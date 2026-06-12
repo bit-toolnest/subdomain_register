@@ -19,41 +19,22 @@ echo
 
 
 #--------------------------------------------------------------------
-# 1) Ensure Linux user exists (create if missing)
+# Ensure Linux user exists (create if missing, passwordless only)
 #--------------------------------------------------------------------
 if ! id "$SERVICE_USER" &>/dev/null; then
-  echo "User '$SERVICE_USER' does not exist."
-  read -rp "Create user '$SERVICE_USER'? [y/N]: " ANS
-  if [[ "$ANS" =~ ^[Yy]$ ]]; then
-    echo "Choose account type:"
-    echo "  1) Passwordless (no password, SSH key only)"
-    echo "  2) Password-protected (prompt for password)"
-    read -rp "Selection [1/2]: " MODE
+  echo "User '$SERVICE_USER' does not exist. Creating passwordless account..."
 
-    # Check if a group with the same name already exists
-    if getent group "$SERVICE_USER" >/dev/null; then
-      GROUP_OPT="--ingroup $SERVICE_USER"
-    else
-      GROUP_OPT=""
-    fi
-
-    if [[ "$MODE" == "1" ]]; then
-      adduser --disabled-password --gecos "" $GROUP_OPT "$SERVICE_USER"
-      echo "Created passwordless user '$SERVICE_USER'"
-    elif [[ "$MODE" == "2" ]]; then
-      adduser $GROUP_OPT "$SERVICE_USER"
-      echo "Created password-protected user '$SERVICE_USER'"
-    else
-      echo "Invalid selection. Aborting."
-      exit 1
-    fi
+  # Check if a group with the same name already exists
+  if getent group "$SERVICE_USER" >/dev/null; then
+    GROUP_OPT="--ingroup $SERVICE_USER"
   else
-    echo "Aborting. Please create user manually."
-    exit 1
+    GROUP_OPT=""
   fi
+
+  # Create user without password (SSH key only)
+  adduser --disabled-password --gecos "" $GROUP_OPT "$SERVICE_USER"
+  echo "Created passwordless user '$SERVICE_USER'"
 fi
-
-
 
 # Get the user's home directory and group dynamically
 SERVICE_HOME=$(getent passwd "$SERVICE_USER" | cut -d: -f6)
