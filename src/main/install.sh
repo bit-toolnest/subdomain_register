@@ -10,12 +10,13 @@ ENV_DIR="/etc/faas_register_tunnel"
 
 echo "── FAAS Tunnel Multi-User Installer ──"
 
-read -rp "Linux username to run service (SERVICE_USER): " SERVICE_USER
-read -rp "Domain (e.g. bitone.in): " DOMAIN
-read -rp "Principal (SSH login user): " PRINCIPAL
-read -rp "Local port to expose: " LOCAL_PORT
-read -rsp "Token: " TOKEN
+SERVICE_USER=${SERVICE_USER:-$(read -rp "Linux username to run service (SERVICE_USER): " tmp && echo "$tmp")}
+DOMAIN=${DOMAIN:-$(read -rp "Domain (e.g. bitone.in): " tmp && echo "$tmp")}
+PRINCIPAL=${PRINCIPAL:-$(read -rp "Principal (SSH login user): " tmp && echo "$tmp")}
+LOCAL_PORT=${LOCAL_PORT:-$(read -rp "Local port to expose: " tmp && echo "$tmp")}
+TOKEN=${TOKEN:-$(read -rsp "Token: " tmp && echo "$tmp")}
 echo
+
 
 #--------------------------------------------------------------------
 # 1) Ensure Linux user exists (create if missing)
