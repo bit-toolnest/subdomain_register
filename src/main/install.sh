@@ -10,12 +10,18 @@ ENV_DIR="/etc/faas_register_tunnel"
 
 echo "── FAAS Tunnel Multi-User Installer ──"
 
-SERVICE_USER=${SERVICE_USER:-$(read -rp "Linux username to run service (SERVICE_USER): " tmp && echo "$tmp")}
-DOMAIN=${DOMAIN:-$(read -rp "Domain (e.g. bitone.in): " tmp && echo "$tmp")}
-PRINCIPAL=${PRINCIPAL:-$(read -rp "Principal (SSH login user): " tmp && echo "$tmp")}
-LOCAL_PORT=${LOCAL_PORT:-$(read -rp "Local port to expose: " tmp && echo "$tmp")}
-TOKEN=${TOKEN:-$(read -rsp "Token: " tmp && echo "$tmp")}
-echo
+# Required configuration is supplied by the environment. The Gradle task
+# sources set_env.sh before invoking this installer; do not prompt here.
+required_vars=(SERVICE_USER DOMAIN PRINCIPAL LOCAL_PORT TOKEN)
+for var in "${required_vars[@]}"; do
+  if [[ -z "${!var:-}" ]]; then
+    echo "ERROR: Required environment variable $var is not set." >&2
+    exit 1
+  fi
+done
+
+[[ "$LOCAL_PORT" =~ ^[0-9]+$ ]] || { echo "ERROR: LOCAL_PORT must be numeric." >&2; exit 1; }
+(( LOCAL_PORT >= 1 && LOCAL_PORT <= 65535 )) || { echo "ERROR: LOCAL_PORT must be between 1 and 65535." >&2; exit 1; }
 
 
 #--------------------------------------------------------------------
